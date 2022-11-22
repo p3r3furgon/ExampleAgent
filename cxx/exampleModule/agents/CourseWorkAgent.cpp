@@ -16,6 +16,26 @@ using namespace utils;
 namespace exampleModule
 {
 
+
+ScAddr getHeadmanNode(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr set){
+	  ScAddr answer = ms_context->CreateNode(ScType::NodeConstStruct);
+    ScAddr first = ms_context->HelperFindBySystemIdtf("nrel_head_group");  
+    logger->Message(ScLog::Type::Info, "Group " + ms_context->HelperGetSystemIdtf(set));  
+    
+    
+    ScIterator5Ptr iter = ms_context->Iterator5(set, ScType::EdgeDCommonConst, ScType::Unknown, ScType::EdgeAccessConstPosPerm, first);
+    while(iter->Next()){
+    	SC_LOG_ERROR("Found headman");
+        logger->Message(ScLog::Type::Info, "headman: " + ms_context->HelperGetSystemIdtf(iter->Get(2)));  
+        ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, iter->Get(2));                  
+        return answer;
+    }
+    logger->Message(ScLog::Type::Info, "headman not found");  
+  
+     
+    return answer;
+}
+
 SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
 {
 
@@ -41,16 +61,14 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, param);
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, Keynodes::globalVisited);
 
+  //firstNode = func(logger, ms_context, answer, structure);
   ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
   while(it3->Next())
-  {
-    firstNode = it3->Get(2);
-    ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, firstNode);
-    ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, Keynodes::visited, firstNode);
-    ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, Keynodes::globalVisited, firstNode);
+   {
+     firstNode = it3->Get(2);
+     ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, firstNode);
     break;
-  }
-
+   }
 
 
   //const std::string name = "ExampleName";
