@@ -23,11 +23,27 @@ ScAddr GetStartNode(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context,
   while(it3->Next())
    {
     startNode = it3->Get(2);
-
     break;
    }
     logger->Message(ScLog::Type::Info, "function found start node");     
     return startNode;
+}
+
+void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr node, int& tmpSize)
+{
+  tmpSize++;
+  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, Keynodes::visited, node);
+  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, Keynodes::globalVisited, node);
+  ScIterator3Ptr it3 = ms_context->Iterator3(node, ScType::EdgeDCommonConst, ScType::NodeConst);
+  while(it3->Next())
+   {
+    if(ms_context->HelperCheckEdge(it3->Get(2), Keynodes::visited, ScType::EdgeAccessConstPosPerm)) 
+    {
+      SC_LOG_ERROR("Cycle is found");
+    }
+    else
+      DFS(logger, ms_context, it3->Get(2), tmpSize);
+   }
 }
 
 SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
@@ -57,8 +73,9 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
 
   startNode = GetStartNode(logger, ms_context, structure);
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, startNode);
-
-  logger->Message(ScLog::Type::Info, "Just a test agent, nothing interesting.");
+  ScAddr edge = ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, Keynodes::visited, startNode);
+  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, edge);
+  DFS(logger, ms_context, startNode, tmpSize);
 
   SC_LOG_ERROR("testAgent finished");
   utils::AgentUtils::finishAgentWork(ms_context.get(), questionNode, answer);
