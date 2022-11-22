@@ -17,23 +17,17 @@ namespace exampleModule
 {
 
 
-ScAddr getHeadmanNode(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr set){
-	  ScAddr answer = ms_context->CreateNode(ScType::NodeConstStruct);
-    ScAddr first = ms_context->HelperFindBySystemIdtf("nrel_head_group");  
-    logger->Message(ScLog::Type::Info, "Group " + ms_context->HelperGetSystemIdtf(set));  
-    
-    
-    ScIterator5Ptr iter = ms_context->Iterator5(set, ScType::EdgeDCommonConst, ScType::Unknown, ScType::EdgeAccessConstPosPerm, first);
-    while(iter->Next()){
-    	SC_LOG_ERROR("Found headman");
-        logger->Message(ScLog::Type::Info, "headman: " + ms_context->HelperGetSystemIdtf(iter->Get(2)));  
-        ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, iter->Get(2));                  
-        return answer;
-    }
-    logger->Message(ScLog::Type::Info, "headman not found");  
-  
-     
-    return answer;
+ScAddr GetStartNode(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr structure){
+  ScAddr startNode;
+  ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
+  while(it3->Next())
+   {
+    startNode = it3->Get(2);
+
+    break;
+   }
+    logger->Message(ScLog::Type::Info, "function found start node");     
+    return startNode;
 }
 
 SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
@@ -54,39 +48,17 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
   int tmpSize = 0;
   std::vector<int> distanceVector;
   ScAddr structure = IteratorUtils::getAnyFromSet(ms_context.get(), param);
-  ScAddr firstNode;
+  ScAddr startNode;
 
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, structure);
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, Keynodes::visited);
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, param);
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, Keynodes::globalVisited);
 
-  //firstNode = func(logger, ms_context, answer, structure);
-  ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
-  while(it3->Next())
-   {
-     firstNode = it3->Get(2);
-     ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, firstNode);
-    break;
-   }
-
-
-  //const std::string name = "ExampleName";
- 
-  //ScAddr linkAddr;
-  //ScLink link((ScMemoryContext&) ms_context, &linkAddr);
-  //link.Set<std::string>("dsafa");
-
-  
-  //ScAddr const linkAddr2 = sc::SetRelationValue((ScMemoryContext&)ms_context, exampleparam, Keynodes::nrel_developer, name);
-  //auto ex = ScType::NodeConst >> "hello";
-
-  //ScAddr kekw = ms_context->CreateNode(ScType::NodeConstStruct);
- 
-  //ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, exampleparam);
+  startNode = GetStartNode(logger, ms_context, structure);
+  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, startNode);
 
   logger->Message(ScLog::Type::Info, "Just a test agent, nothing interesting.");
-  //logger->Message(ScLog::Type::Info, "answ " + link.Get<std::string>());
 
   SC_LOG_ERROR("testAgent finished");
   utils::AgentUtils::finishAgentWork(ms_context.get(), questionNode, answer);
