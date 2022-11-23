@@ -32,15 +32,6 @@ public:
 
   SC_PROPERTY(Keynode("example_action"), ForceCreate)
   static ScAddr example_action;
-
-  SC_PROPERTY(Keynode("nrel_developer"), ForceCreate)
-  static ScAddr nrel_developer;
-
-  SC_PROPERTY(Keynode("visited"), ForceCreate)
-  static ScAddr visited;  
-
-  SC_PROPERTY(Keynode("globalVisited"), ForceCreate)
-  static ScAddr globalVisited;  
 };
 };
 

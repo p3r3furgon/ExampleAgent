@@ -16,31 +16,43 @@ using namespace utils;
 namespace exampleModule
 {
 
-ScAddr GetStartNode(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr structure){
-  ScAddr startNode;
-  ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
-  while(it3->Next())
-   {
-    startNode = it3->Get(2);
-    break;
-   }   
-    return startNode;
-}
+// ScAddr GetStartNode(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr structure){
+//   ScAddr startNode;
+//   ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
+//   while(it3->Next())
+//    {
+//     startNode = it3->Get(2);
+//     break;
+//    }   
+//     return startNode;
+// }
 
-void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr node, ScAddr visited)
+void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr node, ScAddr& visited, ScAddr& globalVisited)
 {
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, visited, node);
-  //ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, Keynodes::globalVisited, node);
   ScIterator3Ptr it3 = ms_context->Iterator3(node, ScType::EdgeDCommonConst, ScType::NodeConst);
   while(it3->Next())
-   {
-    if(ms_context->HelperCheckEdge(visited, it3->Get(2), ScType::EdgeAccessConstPosPerm)) 
+  {
+    if(ms_context->HelperCheckEdge(visited, it3->Get(2), ScType::EdgeAccessConstPosPerm) && 
+      !ms_context->HelperCheckEdge(globalVisited, it3->Get(2), ScType::EdgeAccessConstPosPerm))
       SC_LOG_ERROR("Cycle is found");
-    else
+    else if(!ms_context->HelperCheckEdge(visited, it3->Get(2), ScType::EdgeAccessConstPosPerm))
     {
-      DFS(logger, ms_context, it3->Get(2), visited);
+      //SC_LOG_ERROR("Next step");
+      DFS(logger, ms_context, it3->Get(2), visited, globalVisited);
     }
-   }
+  }
+  ScIterator3Ptr clearVisited = ms_context->Iterator3(visited, ScType::EdgeAccessConstPosPerm, node);
+  while(clearVisited->Next())
+  {
+   // SC_LOG_ERROR("Deleted visited edge");
+    ms_context->EraseElement(clearVisited->Get(1)); 
+  } 
+  if(!ms_context->HelperCheckEdge(globalVisited, node, ScType::EdgeAccessConstPosPerm))
+  {
+     //SC_LOG_ERROR("Created edge between glovalVisited and node");
+    ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, globalVisited, node);
+  }
 }
 
 SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
@@ -56,25 +68,22 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
     return SC_RESULT_ERROR_INVALID_PARAMS;
 
   ScAddr answer = ms_context->CreateNode(ScType::NodeConstStruct);
+  //int n = 0;
+  ScAddr structure = IteratorUtils::getAnyFromSet(ms_context.get(), param);
   ScAddr visited = ms_context->CreateNode(ScType::NodeConstClass);
   ScAddr globalVisited = ms_context->CreateNode(ScType::NodeConstClass);
-  int n = 0;
-  std::vector<int> distanceVector;
-  ScAddr structure = IteratorUtils::getAnyFromSet(ms_context.get(), param);
-  ScAddr startNode;
+  //ScAddr startNode = GetStartNode(logger, ms_context, structure);;
 
-  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, structure);
-  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, visited);
-  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, param);
-  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, globalVisited);
-
-  startNode = GetStartNode(logger, ms_context, structure);
-  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, startNode);
-  ScAddr edge = ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, visited, startNode);
-  ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, edge);
-
-  DFS(logger, ms_context, startNode, visited);
-
+  ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
+  while(it3->Next())
+  {
+   if(!ms_context->HelperCheckEdge(globalVisited, it3->Get(2), ScType::EdgeAccessConstPosPerm))
+   {
+    //  SC_LOG_ERROR("There is no edge between node and globalVisited");
+    ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, answer, it3->Get(2));
+    DFS(logger, ms_context, it3->Get(2), visited, globalVisited);
+   }
+  }   
   SC_LOG_ERROR("testAgent finished");
   utils::AgentUtils::finishAgentWork(ms_context.get(), questionNode, answer);
   return SC_RESULT_OK;

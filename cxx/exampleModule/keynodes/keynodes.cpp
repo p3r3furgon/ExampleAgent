@@ -12,7 +12,4 @@ ScAddr Keynodes::question_find_subdividing;
 ScAddr Keynodes::nrel_subdividing;
 ScAddr Keynodes::question_find_isomorphic_structures;
 ScAddr Keynodes::example_action;
-ScAddr Keynodes::nrel_developer;
-ScAddr Keynodes::visited;
-ScAddr Keynodes::globalVisited;
 }

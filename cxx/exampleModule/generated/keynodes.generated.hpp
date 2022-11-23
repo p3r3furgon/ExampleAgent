@@ -24,9 +24,6 @@
 	nrel_subdividing = ctx.HelperResolveSystemIdtf("nrel_subdividing", ScType::Node); result = result && nrel_subdividing.IsValid(); \
 	question_find_isomorphic_structures = ctx.HelperResolveSystemIdtf("question_find_isomorphic_structures", ScType::Node); result = result && question_find_isomorphic_structures.IsValid(); \
 	example_action = ctx.HelperResolveSystemIdtf("example_action", ScType::Node); result = result && example_action.IsValid(); \
-	nrel_developer = ctx.HelperResolveSystemIdtf("nrel_developer", ScType::Node); result = result && nrel_developer.IsValid(); \
-	visited = ctx.HelperResolveSystemIdtf("visited", ScType::Node); result = result && visited.IsValid(); \
-	globalVisited = ctx.HelperResolveSystemIdtf("globalVisited", ScType::Node); result = result && globalVisited.IsValid(); \
     return result; \
 }
 
