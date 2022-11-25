@@ -44,7 +44,7 @@ public: \
 		SC_ASSERT(!ms_event.get(), ());\
 		SC_ASSERT(!ms_context.get(), ());\
 		ms_context.reset(new ScMemoryContext(sc_access_lvl_make_min, "handler_CourseWorkAgent"));\
-		ms_event.reset(new ScEvent(*ms_context, Keynodes::example_action, ScEvent::Type::AddOutputEdge, &CourseWorkAgent::handler_emit));\
+		ms_event.reset(new ScEvent(*ms_context, Keynodes::question_find_graph_circumference, ScEvent::Type::AddOutputEdge, &CourseWorkAgent::handler_emit));\
         if (ms_event.get())\
         {\
             SC_LOG_INFO("Register agent CourseWorkAgent");\

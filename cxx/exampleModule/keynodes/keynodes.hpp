@@ -30,8 +30,8 @@ public:
   SC_PROPERTY(Keynode("question_find_isomorphic_structures"), ForceCreate)
   static ScAddr question_find_isomorphic_structures;
 
-  SC_PROPERTY(Keynode("example_action"), ForceCreate)
-  static ScAddr example_action;
+  SC_PROPERTY(Keynode("question_find_graph_circumference"), ForceCreate)
+  static ScAddr question_find_graph_circumference;
 };
 };
 

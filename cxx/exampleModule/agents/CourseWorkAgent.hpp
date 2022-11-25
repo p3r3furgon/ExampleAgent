@@ -12,7 +12,7 @@ namespace exampleModule
 
 class CourseWorkAgent : public ScAgent
 {
-  SC_CLASS(Agent, Event(Keynodes::example_action, ScEvent::Type::AddOutputEdge))
+  SC_CLASS(Agent, Event(Keynodes::question_find_graph_circumference, ScEvent::Type::AddOutputEdge))
   SC_GENERATED_BODY()
 };
 
