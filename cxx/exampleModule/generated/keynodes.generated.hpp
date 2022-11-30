@@ -24,6 +24,7 @@
 	nrel_subdividing = ctx.HelperResolveSystemIdtf("nrel_subdividing", ScType::Node); result = result && nrel_subdividing.IsValid(); \
 	question_find_isomorphic_structures = ctx.HelperResolveSystemIdtf("question_find_isomorphic_structures", ScType::Node); result = result && question_find_isomorphic_structures.IsValid(); \
 	question_find_graph_circumference = ctx.HelperResolveSystemIdtf("question_find_graph_circumference", ScType::Node); result = result && question_find_graph_circumference.IsValid(); \
+	test_action = ctx.HelperResolveSystemIdtf("test_action", ScType::Node); result = result && test_action.IsValid(); \
     return result; \
 }
 

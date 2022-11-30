@@ -9,6 +9,7 @@
 #include "agents/SubdividingSearchAgent.hpp"
 #include "agents/IsomorphicSearchAgent.hpp"
 #include "agents/CourseWorkAgent.hpp"
+#include "agents/TestAgent.hpp"
 
 using namespace exampleModule;
 
@@ -22,6 +23,7 @@ sc_result ExampleModule::InitializeImpl()
   SC_AGENT_REGISTER(SubdividingSearchAgent)
   SC_AGENT_REGISTER(IsomorphicSearchAgent)
   SC_AGENT_REGISTER(CourseWorkAgent)
+  SC_AGENT_REGISTER(TestAgent)
 
   return SC_RESULT_OK;
 }
@@ -31,6 +33,7 @@ sc_result ExampleModule::ShutdownImpl()
   SC_AGENT_UNREGISTER(SubdividingSearchAgent)
   SC_AGENT_UNREGISTER(IsomorphicSearchAgent)
   SC_AGENT_UNREGISTER(CourseWorkAgent)
+  SC_AGENT_UNREGISTER(TestAgent)
 
   return SC_RESULT_OK;
 }

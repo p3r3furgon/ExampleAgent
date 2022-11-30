@@ -28,7 +28,7 @@ void RemoveOldLinks(std::unique_ptr<ScMemoryContext> &ms_context, ScAddr& struct
    while(it3_2->Next())
    {
     //Remove edge between link and node 
-    ms_context->EraseElement(it3_2->Get(1)); //???
+    //ms_context->EraseElement(it3_2->Get(1)); //???
     //Remove link
     ms_context->EraseElement(it3_2->Get(2));
    }   
@@ -45,15 +45,15 @@ void CreateDistancesLinks(std::unique_ptr<ScMemoryContext> &ms_context, ScAddr& 
 }
 
 //Get link that connected to known node
-ScAddr GetDistanceLink(std::unique_ptr<ScMemoryContext> &ms_context, ScAddr& node)
-{
-  ScIterator3Ptr it3 = ms_context->Iterator3(node, ScType::EdgeAccessConstPosPerm, ScType::LinkVar);
-  while(it3->Next())
-   {
-    return it3->Get(2);
-   }   
-   return {};
-}
+// ScAddr GetDistanceLink(std::unique_ptr<ScMemoryContext> &ms_context, ScAddr& node)
+// {
+//   ScIterator3Ptr it3 = ms_context->Iterator3(node, ScType::EdgeAccessConstPosPerm, ScType::LinkVar);
+//   while(it3->Next())
+//    {
+//     return it3->Get(2);
+//    }   
+//    return {};
+// }
 
 //Get link information, ???(cast)
 uint32_t GetLinkInfo(std::unique_ptr<ScMemoryContext> &ms_context, ScAddr node)
@@ -91,14 +91,26 @@ ScAddr GetMaxCycleSize(std::unique_ptr<ScMemoryContext> &ms_context, ScAddr dist
   return res; 
 }
 
+void GetNodeIdtf(std::unique_ptr<ScMemoryContext> &ms_context, ScLog *logger, ScAddr node)
+{
+  ScIterator3Ptr it3 = ms_context->Iterator3(node, ScType::EdgeDCommonConst, ScType::LinkConst);
+  while(it3->Next())
+   {
+    logger->Message(ScLog::Type::Info, "Im in:  "+ CommonUtils::getLinkContent(ms_context.get(), it3->Get(2)));
+   }  
+}
+
 //Graph detour using DFS
 void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr node, 
          ScAddr& visited, ScAddr& globalVisited, uint32_t& tmpSize, ScAddr& distances)
 {
   //Put tmpSize value to distanceLink
-  ScAddr distanceLink = GetDistanceLink(ms_context, node);
-  ms_context->SetLinkContent(distanceLink, to_string(tmpSize));
-  
+  GetNodeIdtf(ms_context, logger, node);
+  ScIterator3Ptr it3_3 = ms_context->Iterator3(node, ScType::EdgeAccessConstPosPerm, ScType::LinkVar);
+  while(it3_3->Next())
+  {
+    ms_context->SetLinkContent(it3_3->Get(2), to_string(tmpSize));
+  }
   //Create edge between current node and visited node
   ms_context->CreateEdge(ScType::EdgeAccessConstPosPerm, visited, node);
 
@@ -108,7 +120,7 @@ void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr nod
   ScIterator3Ptr it3 = ms_context->Iterator3(node, ScType::EdgeDCommonConst, ScType::NodeConst);
   while(it3->Next())
   {
-    //if adjacent node is visited and isn't glovalVisited 
+    //if adjacent node is visited and isn't globalVisited 
     if(ms_context->HelperCheckEdge(visited, it3->Get(2), ScType::EdgeAccessConstPosPerm) && 
       !ms_context->HelperCheckEdge(globalVisited, it3->Get(2), ScType::EdgeAccessConstPosPerm))
     {
@@ -123,6 +135,7 @@ void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr nod
     {
       //Move to the next node 
       DFS(logger, ms_context, it3->Get(2), visited, globalVisited, tmpSize, distances);
+      GetNodeIdtf(ms_context, logger, node);
     }
   }
   //Remove edge between visited and current node
@@ -132,7 +145,7 @@ void DFS(ScLog *logger, std::unique_ptr<ScMemoryContext> &ms_context, ScAddr nod
   {
    //Remove edge
    ms_context->EraseElement(it3_2->Get(1)); 
-  } 
+  }
   //Create edge between current node and globalVisited node
   if(!ms_context->HelperCheckEdge(globalVisited, node, ScType::EdgeAccessConstPosPerm))//if this edge isn't exist 
   {
@@ -157,7 +170,7 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
 
   if (!param.IsValid()||!structure.IsValid())
     return SC_RESULT_ERROR_INVALID_PARAMS;
-  
+
   //This iterator finds all nodes of graph in the structure
   ScIterator3Ptr it3 = ms_context->Iterator3(structure, ScType::EdgeAccessConstPosPerm, ScType::NodeConst);
   while(it3->Next())
@@ -169,6 +182,8 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
     DFS(logger, ms_context, it3->Get(2), visited, globalVisited, tmpSize, distances); //Call DFS to current node
    }
   }   
+
+
   //Check if DFS found cycles
   bool hasCycles = false;
   //This iterator finds links that are connected with distances link
@@ -190,6 +205,7 @@ SC_AGENT_IMPLEMENTATION(CourseWorkAgent)
 
   utils::AgentUtils::finishAgentWork(ms_context.get(), questionNode, answer);
   return SC_RESULT_OK;
+  
 }
 }
 

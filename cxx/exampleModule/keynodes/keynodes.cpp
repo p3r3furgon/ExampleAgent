@@ -12,4 +12,5 @@ ScAddr Keynodes::question_find_subdividing;
 ScAddr Keynodes::nrel_subdividing;
 ScAddr Keynodes::question_find_isomorphic_structures;
 ScAddr Keynodes::question_find_graph_circumference;
+ScAddr Keynodes::test_action;
 }

@@ -32,6 +32,9 @@ public:
 
   SC_PROPERTY(Keynode("question_find_graph_circumference"), ForceCreate)
   static ScAddr question_find_graph_circumference;
+
+  SC_PROPERTY(Keynode("test_action"), ForceCreate)
+  static ScAddr test_action;
 };
 };
 
